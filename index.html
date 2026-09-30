@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Misi Karangan Tahun 3</title>
+<style>
+:root{
+  --blue:#4f8cff; --purple:#7c5cff; --green:#24b47e; --red:#ef5b68;
+  --yellow:#ffd95a; --ink:#24324a; --soft:#f4f7ff; --white:#fff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family: "Trebuchet MS", Arial, sans-serif; color:var(--ink);
+  background:linear-gradient(135deg,#dff3ff,#eee6ff);
+  min-height:100vh;
+}
+.app{max-width:900px;margin:auto;padding:18px}
+.card{
+  background:rgba(255,255,255,.97); border-radius:28px; padding:28px;
+  box-shadow:0 14px 35px rgba(51,70,120,.16); margin:20px auto;
+}
+.hidden{display:none!important}
+.logo{font-size:3.5rem;text-align:center}
+h1{text-align:center;font-size:2.25rem;margin:8px 0;color:#4259b8}
+h2{font-size:1.55rem;line-height:1.35}
+.subtitle{text-align:center;font-size:1.1rem;line-height:1.5}
+label{font-weight:700;display:block;margin:18px 0 8px}
+input{
+  width:100%;padding:16px 18px;border:3px solid #d9e1ff;border-radius:16px;
+  font-size:1.05rem;outline:none;
+}
+input:focus{border-color:var(--blue)}
+button{
+  border:0;border-radius:16px;padding:15px 22px;font-size:1.05rem;
+  font-weight:800;cursor:pointer;transition:.18s;touch-action:manipulation;
+}
+button:hover{transform:translateY(-2px)}
+.primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:white;width:100%;margin-top:18px}
+.option{
+  display:block;width:100%;text-align:left;background:#f7f9ff;
+  border:3px solid #dce4ff;margin:12px 0;color:var(--ink);
+}
+.option:hover{border-color:var(--blue);background:#eef4ff}
+.option.correct{background:#dff8ed;border-color:var(--green);color:#08724d}
+.option.wrong{background:#ffe5e8;border-color:var(--red);color:#a12634}
+.option:disabled{cursor:default;transform:none}
+.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.badge{background:#edf2ff;padding:9px 14px;border-radius:999px;font-weight:800}
+.progress{height:14px;background:#e8ecf7;border-radius:99px;overflow:hidden;margin:16px 0 24px}
+.progress > div{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:.3s}
+.feedback{border-radius:18px;padding:15px 18px;margin-top:16px;font-weight:700;line-height:1.45}
+.feedback.good{background:#dff8ed;color:#08724d}
+.feedback.bad{background:#ffe7ea;color:#9f2633}
+.next{background:#24324a;color:#fff;margin-top:14px;width:100%}
+.scoreCircle{
+  width:150px;height:150px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;margin:18px auto;background:linear-gradient(135deg,#ffd95a,#ffb84d);
+  font-size:2.1rem;font-weight:900;color:#553c00;border:8px solid white;
+  box-shadow:0 8px 25px rgba(0,0,0,.12)
+}
+.resultText{text-align:center;font-size:1.2rem;line-height:1.6}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.stat{background:var(--soft);border-radius:18px;padding:16px;text-align:center}
+.stat b{display:block;font-size:1.6rem;margin-bottom:4px}
+.small{text-align:center;color:#66728a;font-size:.9rem;margin-top:16px}
+.example{
+  background:#fff8d9;border-left:6px solid var(--yellow);padding:12px 15px;
+  border-radius:12px;margin-top:15px;line-height:1.5
+}
+@media(max-width:600px){
+  .app{padding:10px}.card{padding:20px;border-radius:22px}
+  h1{font-size:1.8rem}.logo{font-size:2.8rem}.stats{grid-template-columns:1fr}
+  .option{font-size:1rem;padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="startScreen" class="card">
+    <div class="logo">📚✏️🌟</div>
+    <h1>Misi Karangan Tahun 3</h1>
+    <p class="subtitle">
+      Jom jadi <strong>Juara Karangan!</strong><br>
+      Jawab 20 soalan tentang bina ayat, susunan idea, kata hubung dan karangan.
+    </p>
+    <label for="studentName">Nama Murid</label>
+    <input id="studentName" type="text" maxlength="40" placeholder="Contoh: Aisyah">
+    <button class="primary" id="startBtn">🚀 MULA PERMAINAN</button>
+    <p class="small">Tip: Baca soalan dengan teliti sebelum memilih jawapan.</p>
+  </section>
+
+  <section id="gameScreen" class="card hidden">
+    <div class="topbar">
+      <span class="badge" id="studentBadge">👤 Murid</span>
+      <span class="badge" id="scoreBadge">⭐ Markah: 0</span>
+      <span class="badge" id="questionBadge">Soalan 1/20</span>
+    </div>
+    <div class="progress"><div id="progressBar" style="width:5%"></div></div>
+
+    <h2 id="questionText"></h2>
+    <div id="options"></div>
+    <div id="feedback" class="feedback hidden"></div>
+    <button id="nextBtn" class="next hidden">➡️ Soalan Seterusnya</button>
+  </section>
+
+  <section id="resultScreen" class="card hidden">
+    <div class="logo">🏆</div>
+    <h1>Tahniah!</h1>
+    <p class="resultText" id="resultMessage"></p>
+    <div class="scoreCircle" id="finalScore">0/20</div>
+    <div class="stats">
+      <div class="stat"><b id="correctCount">0</b>Betul</div>
+      <div class="stat"><b id="wrongCount">0</b>Salah</div>
+      <div class="stat"><b id="percentScore">0%</b>Peratus</div>
+    </div>
+    <button class="primary" id="restartBtn">🔄 MAIN SEMULA</button>
+    <p class="small">Teruskan berlatih. Setiap kesilapan membantu kita belajar! 💪</p>
+  </section>
+
+</div>
+
+<script>
+const questions = [
+  {
+    q:"Pilih ayat yang paling sesuai sebagai ayat pembuka karangan bertajuk “Aktiviti Hujung Minggu”.",
+    a:["Pada hari Ahad yang lalu, saya dan keluarga pergi berkelah di taman.","Saya makan nasi dengan sudu.","Buku itu berwarna biru."],
+    correct:0,
+    explain:"Ayat pertama memperkenalkan masa, watak dan aktiviti yang sesuai dengan tajuk."
+  },
+  {
+    q:"Pilih kata hubung yang paling sesuai: “Ali membawa payung ______ hujan turun.”",
+    a:["kerana","tetapi","dan"],
+    correct:0,
+    explain:"“Kerana” digunakan untuk menunjukkan sebab."
+  },
+  {
+    q:"Manakah susunan peristiwa yang paling sesuai dalam sebuah karangan?",
+    a:["Penutup → permulaan → isi","Permulaan → isi → penutup","Isi → penutup → permulaan"],
+    correct:1,
+    explain:"Karangan biasanya mempunyai permulaan, isi dan penutup."
+  },
+  {
+    q:"Pilih ayat yang menggunakan huruf besar dengan betul.",
+    a:["pada hari Isnin, kami ke sekolah.","Pada hari Isnin, kami ke sekolah.","Pada Hari isnin, kami ke sekolah."],
+    correct:1,
+    explain:"Huruf pertama pada permulaan ayat dan nama hari perlu ditulis dengan betul."
+  },
+  {
+    q:"Apakah ayat yang paling sesuai untuk menggambarkan suasana taman?",
+    a:["Taman itu sangat indah dan dipenuhi bunga yang berwarna-warni.","Saya mempunyai dua batang pensel.","Ibu membeli ikan di pasar."],
+    correct:0,
+    explain:"Ayat pertama menerangkan keadaan dan suasana taman."
+  },
+  {
+    q:"Pilih ayat yang mempunyai tanda baca yang betul.",
+    a:["Wah, cantiknya bunga itu!","Wah cantiknya bunga itu","Wah, cantiknya bunga itu"],
+    correct:0,
+    explain:"Tanda seru sesuai digunakan untuk menunjukkan rasa kagum."
+  },
+  {
+    q:"“Saya bangun awal ______ bersiap untuk ke sekolah.” Kata hubung yang sesuai ialah…",
+    a:["lalu","tetapi","kerana"],
+    correct:0,
+    explain:"“Lalu” menunjukkan perbuatan yang berlaku selepas perbuatan sebelumnya."
+  },
+  {
+    q:"Pilih ayat yang paling sesuai sebagai ayat penutup karangan.",
+    a:["Akhirnya, kami pulang ke rumah dengan hati yang gembira.","Pada pukul lapan pagi, kami bertolak.","Di taman itu terdapat banyak pokok."],
+    correct:0,
+    explain:"“Akhirnya” menandakan peristiwa penutup."
+  },
+  {
+    q:"Apakah perkataan yang sesuai untuk menggambarkan perasaan selepas mendapat hadiah?",
+    a:["gembira","marah","lapar"],
+    correct:0,
+    explain:"Mendapat hadiah biasanya menimbulkan perasaan gembira."
+  },
+  {
+    q:"Pilih ayat yang paling lengkap.",
+    a:["Pergi ke perpustakaan.","Siti membaca sebuah buku cerita di perpustakaan.","Buku cerita."],
+    correct:1,
+    explain:"Ayat kedua mempunyai subjek, perbuatan dan keterangan tempat."
+  },
+  {
+    q:"“Kami membawa makanan ______ minuman untuk berkelah.”",
+    a:["dan","tetapi","kerana"],
+    correct:0,
+    explain:"“Dan” menghubungkan dua perkara yang ditambah."
+  },
+  {
+    q:"Pilih perkataan yang paling sesuai: “Cuaca pada pagi itu sangat ______.”",
+    a:["cerah","berlari","membaca"],
+    correct:0,
+    explain:"“Cerah” ialah perkataan yang sesuai untuk menerangkan keadaan cuaca."
+  },
+  {
+    q:"Ayat manakah paling sesuai untuk menerangkan aktiviti gotong-royong?",
+    a:["Murid-murid membersihkan kawasan sekolah bersama-sama.","Murid itu sedang tidur di dalam bilik.","Ayah memandu kereta ke pejabat."],
+    correct:0,
+    explain:"Ayat pertama tepat kerana menunjukkan aktiviti membersihkan kawasan secara bersama."
+  },
+  {
+    q:"Pilih kata adjektif dalam ayat: “Bunga itu sangat cantik.”",
+    a:["bunga","sangat","cantik"],
+    correct:2,
+    explain:"“Cantik” menerangkan sifat bunga."
+  },
+  {
+    q:"Pilih ayat yang paling sesuai untuk menunjukkan urutan selepas itu.",
+    a:["Kemudian, kami menyusun buku di atas rak.","Kerana hujan turun.","Buku itu berwarna merah."],
+    correct:0,
+    explain:"“Kemudian” menunjukkan peristiwa yang berlaku selepas sesuatu peristiwa."
+  },
+  {
+    q:"Manakah ayat yang paling sesuai untuk karangan bertajuk “Pengalaman di Zoo”?",
+    a:["Saya berasa teruja apabila melihat gajah yang besar.","Saya membeli kasut baharu semalam.","Adik sedang membuat kerja sekolah."],
+    correct:0,
+    explain:"Ayat pertama berkaitan pengalaman melihat haiwan di zoo."
+  },
+  {
+    q:"Pilih ejaan yang betul.",
+    a:["sekolah","sekollah","sekolahh"],
+    correct:0,
+    explain:"Ejaan yang betul ialah “sekolah”."
+  },
+  {
+    q:"Pilih ayat yang paling menarik untuk memulakan karangan.",
+    a:["Pada suatu petang yang cerah, saya dan abang bermain bola di padang.","Bola.","Saya ada abang."],
+    correct:0,
+    explain:"Ayat pertama memberikan gambaran masa, cuaca, watak dan aktiviti."
+  },
+  {
+    q:"Apakah perkara penting yang perlu ada dalam isi karangan?",
+    a:["Peristiwa atau maklumat yang berkaitan dengan tajuk","Nama semua kawan walaupun tidak berkaitan","Perkataan yang panjang sahaja"],
+    correct:0,
+    explain:"Isi mestilah berkaitan dengan tajuk supaya karangan jelas."
+  },
+  {
+    q:"Pilih penutup yang paling sesuai bagi karangan tentang membantu ibu.",
+    a:["Saya berasa gembira kerana dapat membantu ibu di rumah.","Selepas itu saya pergi ke sekolah.","Ibu sedang memasak nasi."],
+    correct:0,
+    explain:"Ayat pertama sesuai sebagai penutup kerana merumuskan pengalaman dan perasaan."
+  }
+];
+
+let current=0, score=0, answered=false, student="";
+
+const $ = id => document.getElementById(id);
+
+$("startBtn").addEventListener("click", startGame);
+$("nextBtn").addEventListener("click", nextQuestion);
+$("restartBtn").addEventListener("click", () => {
+  $("resultScreen").classList.add("hidden");
+  $("startScreen").classList.remove("hidden");
+  $("studentName").value = student;
+});
+
+function startGame(){
+  student = $("studentName").value.trim();
+  if(!student){
+    $("studentName").focus();
+    $("studentName").style.borderColor = "#ef5b68";
+    setTimeout(() => $("studentName").style.borderColor = "", 900);
+    return;
+  }
+  current=0; score=0;
+  $("startScreen").classList.add("hidden");
+  $("resultScreen").classList.add("hidden");
+  $("gameScreen").classList.remove("hidden");
+  $("studentBadge").textContent = "👤 " + student;
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered=false;
+  const item=questions[current];
+  $("questionBadge").textContent=`Soalan ${current+1}/20`;
+  $("scoreBadge").textContent=`⭐ Markah: ${score}`;
+  $("progressBar").style.width=((current+1)/questions.length*100)+"%";
+  $("questionText").textContent=item.q;
+  $("feedback").className="feedback hidden";
+  $("feedback").textContent="";
+  $("nextBtn").classList.add("hidden");
+
+  const box=$("options");
+  box.innerHTML="";
+  item.a.forEach((answer,i)=>{
+    const btn=document.createElement("button");
+    btn.className="option";
+    btn.textContent=String.fromCharCode(65+i)+". "+answer;
+    btn.addEventListener("click",()=>chooseAnswer(i));
+    box.appendChild(btn);
+  });
+}
+
+function chooseAnswer(index){
+  if(answered) return;
+  answered=true;
+  const item=questions[current];
+  const buttons=[...$("options").children];
+  buttons.forEach((b,i)=>b.disabled=true);
+  buttons[item.correct].classList.add("correct");
+
+  if(index===item.correct){
+    score++;
+    $("feedback").className="feedback good";
+    $("feedback").innerHTML="✅ <strong>Betul!</strong> "+item.explain;
+  }else{
+    buttons[index].classList.add("wrong");
+    $("feedback").className="feedback bad";
+    $("feedback").innerHTML="❌ <strong>Belum tepat.</strong> Jawapan yang betul ialah <strong>"+item.a[item.correct]+"</strong>.<br>"+item.explain;
+  }
+  $("feedback").classList.remove("hidden");
+  $("scoreBadge").textContent=`⭐ Markah: ${score}`;
+  $("nextBtn").textContent=current===questions.length-1 ? "🏆 Lihat Keputusan" : "➡️ Soalan Seterusnya";
+  $("nextBtn").classList.remove("hidden");
+}
+
+function nextQuestion(){
+  if(!answered) return;
+  current++;
+  if(current<questions.length) renderQuestion();
+  else showResult();
+}
+
+function showResult(){
+  $("gameScreen").classList.add("hidden");
+  $("resultScreen").classList.remove("hidden");
+  const percent=Math.round(score/questions.length*100);
+  $("finalScore").textContent=`${score}/20`;
+  $("correctCount").textContent=score;
+  $("wrongCount").textContent=20-score;
+  $("percentScore").textContent=percent+"%";
+
+  let message="";
+  if(score>=18) message=`Hebat, ${student}! 🌟 Anda sangat menguasai asas penulisan karangan.`;
+  else if(score>=14) message=`Syabas, ${student}! 👏 Penguasaan anda semakin baik. Teruskan berlatih!`;
+  else if(score>=10) message=`Bagus, ${student}! 😊 Anda sudah mempunyai asas. Mari berlatih lagi untuk menjadi lebih hebat.`;
+  else message=`Jangan berputus asa, ${student}! 💪 Cuba lagi dan baca setiap soalan dengan teliti.`;
+  $("resultMessage").innerHTML=message;
+}
+</script>
+</body>
+</html>
